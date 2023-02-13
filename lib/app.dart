@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'main.dart';
+import 'package:flutter_firebase_firestore_first/firestore/presentation/home_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -10,10 +9,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Alura Flutter with Firebase',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomeScreen(),
     );
   }
 }
