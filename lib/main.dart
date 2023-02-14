@@ -3,9 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_firebase_firestore_first/firebase_options.dart';
 
 import 'app.dart';
+import 'firestore/services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
+
+  analytics();
+}
+
+void analytics()
+{
+  AnalyticsService analytics = AnalyticsService();
+  analytics.updateAnalytics(field: 'total_access');
 }

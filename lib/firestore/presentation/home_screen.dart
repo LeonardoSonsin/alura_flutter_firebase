@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_firestore_first/firestore/services/analytics_service.dart';
+import 'package:flutter_firebase_firestore_first/firestore/services/listins_service.dart';
 import '../models/listin.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,10 +12,17 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<Listin> listListins = [
-    Listin(id: "L001", name: "Feira de Outubro"),
-    Listin(id: "L002", name: "Feira de Novembro"),
-  ];
+  AnalyticsService analyticsService = AnalyticsService();
+  ListinsService listinsService = ListinsService();
+
+  List<Listin> listListins = [];
+  FirebaseFirestore db = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    refresh();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,19 +44,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 18),
               ),
             )
-          : ListView(
-              children: List.generate(
-                listListins.length,
-                (index) {
-                  Listin model = listListins[index];
-                  return ListTile(
-                    leading: const Icon(Icons.list_alt_rounded),
-                    title: Text(model.name),
-                    subtitle: Text(model.id),
-                  );
-                },
+          : RefreshIndicator(
+            onRefresh: () {
+              analyticsService.updateAnalytics(field: 'manual_refresh');
+              return refresh();
+            },
+            child: ListView(
+                children: List.generate(
+                  listListins.length,
+                  (index) {
+                    Listin model = listListins[index];
+                    return ListTile(
+                      leading: const Icon(Icons.list_alt_rounded),
+                      title: Text(model.name),
+                      subtitle: Text(model.id),
+                      //onLongPress: listinsService.deleteList(id: id),
+                    );
+                  },
+                ),
               ),
-            ),
+          ),
     );
   }
 
@@ -80,12 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(title, style: Theme.of(context).textTheme.headlineSmall),
               TextFormField(
                 controller: nameController,
-                decoration:
-                    const InputDecoration(label: Text("Nome do Listin")),
+                decoration: const InputDecoration(
+                  label: Text("Nome do Listin"),
+                ),
               ),
-              const SizedBox(
-                height: 16,
-              ),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -100,7 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        //TODO: Implementar adição
+                        listinsService.addNewList(name: nameController.text);
+                        analyticsService.updateAnalytics(field: 'added_lists');
+                        refresh();
+                        Navigator.pop(context);
                       },
                       child: Text(confirmationButton)),
                 ],
@@ -110,5 +129,10 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  refresh() async {
+    listListins = await listinsService.getAll();
+    setState(() {});
   }
 }
