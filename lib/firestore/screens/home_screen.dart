@@ -45,29 +45,49 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             )
           : RefreshIndicator(
-            onRefresh: () {
-              analyticsService.updateAnalytics(field: 'manual_refresh');
-              return refresh();
-            },
-            child: ListView(
+              onRefresh: () {
+                analyticsService.updateAnalytics(field: 'manual_refresh');
+                return refresh();
+              },
+              child: ListView(
                 children: List.generate(
                   listListins.length,
                   (index) {
                     Listin model = listListins[index];
-                    return ListTile(
-                      leading: const Icon(Icons.list_alt_rounded),
-                      title: Text(model.name),
-                      subtitle: Text(model.id),
-                      //onLongPress: listinsService.deleteList(id: id),
+                    return Dismissible(
+                      key: ValueKey<Listin>(model),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (direction) {
+                        remove(model);
+                      },
+                      child: ListTile(
+                        leading: const Icon(Icons.list_alt_rounded),
+                        title: Text(model.name),
+                        subtitle: Text(model.id),
+                        onLongPress: () {
+                          showFormModal(model: model);
+                        },
+                      ),
                     );
                   },
                 ),
               ),
-          ),
+            ),
     );
   }
 
-  showFormModal() {
+  void remove(Listin model) {
+    listinsService.deleteList(id: model.id);
+    refresh();
+  }
+
+  showFormModal({Listin? model}) {
     // Labels à serem mostradas no Modal
     String title = "Adicionar Listin";
     String confirmationButton = "Salvar";
@@ -75,6 +95,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Controlador do campo que receberá o nome do Listin
     TextEditingController nameController = TextEditingController();
+
+    // Caso esteja editando
+    if (model != null) {
+      title = "Editando ${model.name}";
+      nameController.text = model.name;
+    }
 
     // Função do Flutter que mostra o modal na tela
     showModalBottomSheet(
@@ -116,8 +142,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   ElevatedButton(
                       onPressed: () {
-                        listinsService.addNewList(name: nameController.text);
-                        analyticsService.updateAnalytics(field: 'added_lists');
+                        if (model != null) {
+                          listinsService.updateList(
+                              id: model.id, name: nameController.text);
+                        } else {
+                          listinsService.addNewList(name: nameController.text);
+                          analyticsService.updateAnalytics(
+                              field: 'added_lists');
+                        }
                         refresh();
                         Navigator.pop(context);
                       },
