@@ -6,13 +6,13 @@ class ListinsService {
   CollectionReference<Map<String, dynamic>> db =
       FirebaseFirestore.instance.collection('listins');
 
-  Future<List<Listin>> getAll() async {
-    List<Listin> temp = [];
-    QuerySnapshot<Map<String, dynamic>> snapshot = await db.get();
-    for (var doc in snapshot.docs) {
-      temp.add(Listin.fromMap(doc.data()));
-    }
-    return temp;
+  Stream<List<Listin>> getAll() {
+    return db
+        .orderBy('name')
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+        .map((doc) => Listin.fromMap(doc.data()))
+        .toList());
   }
 
   Future addNewList({required String name}) async {

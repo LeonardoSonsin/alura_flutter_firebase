@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'firestore/screens/home_screen.dart';
+import 'firestore/screens/home/container/home_container.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Alura Flutter with Firebase',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomeScreen(),
+      home: const HomeContainer(),
     );
   }
 }

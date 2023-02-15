@@ -10,11 +10,5 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 
-  analytics();
-}
-
-void analytics()
-{
-  AnalyticsService analytics = AnalyticsService();
-  analytics.updateAnalytics(field: 'total_access');
+  AnalyticsService().updateAnalytics(field: 'total_access');
 }
